@@ -529,11 +529,14 @@ if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded'
 </script><script>
 /* Simpan lokal: centang checklist dan perubahan lain bertahan di perangkat ini (per browser). Tombol Simpan tetap mengunduh salinan HTML. */
 (function(){
-  var KEY='mspa-state-v1', last='';
+  var KEY='mspa-state-v1', last='', EXP0=null;
+  try{var snap=document.getElementById('prova-snapshot');if(snap)EXP0=(JSON.parse(snap.textContent)||{}).exportedAt||null;}catch(e){}
   function persist(){
     try{
       if(typeof window.PROVA_GET!=='function')return;
-      var s=JSON.stringify(window.PROVA_GET());
+      var d=window.PROVA_GET();
+      if(d&&EXP0)d.exportedAt=EXP0;
+      var s=JSON.stringify(d);
       if(s&&s!==last){last=s;localStorage.setItem(KEY,s);}
     }catch(e){}
   }
