@@ -522,7 +522,8 @@ function renderMom(){
 }
 function renderNotes(){
   var tones={warning:'',note:' note'};
-  document.getElementById('srcNotes').innerHTML=(D.sourceNotes||[]).map(function(n){
+  var snEl=document.getElementById('srcNotes'); if(!snEl)return;
+  snEl.innerHTML=(D.sourceNotes||[]).map(function(n){
     return '<div class="notice'+(tones[n.tone]||'')+'"><b>'+esc(n.title)+'</b><br>'+esc(n.body)+'</div>';
   }).join('')||'<div class="sm2">-</div>';
 }
