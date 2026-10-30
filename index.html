@@ -144,7 +144,7 @@ body{padding:12px!important}
     <select id="fPic"><option value="">Semua PIC</option></select>
     <select id="fSt"><option value="">Semua status</option></select>
     <button id="btnEdit" class="primary">Mode Edit</button>
-    <button id="btnAdd">+ Butir baru</button>
+    <input type="text" id="apNewText" placeholder="Tulis butir action plan baru..." style="flex:1 1 200px;min-width:160px"><select id="apNewWs" title="Workstream"></select><select id="apNewPic" title="PIC"></select><button id="btnAdd" class="primary">+ Tambah</button>
     <button id="btnCsv">Ekspor CSV</button>
     <button id="btnJson">Ekspor JSON</button>
     <button id="btnSave" class="primary" data-prova-save>Simpan</button>
@@ -247,7 +247,7 @@ function detailHtml(x){
 }
 function renderTable(){
   var vis=visibleTasks();
-  var th=['No','Butir / deliverable','Workstream','PIC','Target','Status','Progres'];
+  var th=['No','Butir / deliverable','Workstream','PIC','Target','Status','Progres','Aksi'];
   document.getElementById('tbl').querySelector('thead').innerHTML='<tr>'+th.map(function(h){return '<th>'+h+'</th>';}).join('')+'</tr>';
   var seq=0;
   var body=vis.map(function(x){
@@ -259,11 +259,11 @@ function renderTable(){
     var dueCell=editing?'<span contenteditable="true" data-field="due" data-id="'+x.id+'">'+esc(x.due||'')+'</span>':esc(x.due||'-');
     var out='<tr class="'+cls+'"><td>'+seq+'</td><td>'+ttl+sub+'</td><td class="sm2">'+esc(wsLabel(x.ws))+'</td><td>'+picCell+'</td><td class="sm2">'+dueCell+'</td>'+
       '<td><span class="pill '+cls+'" data-act="st" data-id="'+x.id+'">'+esc(x.status)+'</span></td>'+
-      '<td><div style="display:flex;align-items:center;gap:8px"><div class="bar" style="flex:1"><i style="width:'+p+'%"></i></div><span class="sm2">'+p+'%</span></div></td></tr>';
-    if(isOpen)out+='<tr class="row-detail"><td colspan="7">'+detailHtml(x)+'</td></tr>';
+      '<td><div style="display:flex;align-items:center;gap:8px"><div class="bar" style="flex:1"><i style="width:'+p+'%"></i></div><span class="sm2">'+p+'%</span></div></td><td><button class="mini danger" data-act="del" data-id="'+x.id+'">Hapus</button></td></tr>';
+    if(isOpen)out+='<tr class="row-detail"><td colspan="8">'+detailHtml(x)+'</td></tr>';
     return out;
   }).join('');
-  if(!vis.length)body='<tr><td colspan="7" class="sm2" style="padding:18px">Tidak ada butir yang cocok dengan filter.</td></tr>';
+  if(!vis.length)body='<tr><td colspan="8" class="sm2" style="padding:18px">Tidak ada butir yang cocok dengan filter.</td></tr>';
   document.getElementById('tbl').querySelector('tbody').innerHTML=body;
   document.getElementById('tblFoot').textContent='Menampilkan '+vis.length+' dari '+D.tasks.length+' butir.'+(editing?' Mode Edit aktif — klik teks untuk mengubah, perubahan tersimpan saat menekan Simpan.':'');
 }
@@ -341,14 +341,20 @@ function wire(){
     document.querySelector('.panel').classList.toggle('editing',editing);
     renderTable();
   });
-  document.getElementById('btnAdd').addEventListener('click',function(){
-    var n=D.tasks.length+1;
-    var t={id:'n'+Date.now(),ws:D.workstreams[0]?D.workstreams[0].id:'',title:'Butir baru',pic:D.pics[0]||'',due:'',usulan:true,status:'Belum mulai',deliverable:'',note:''};
-    D.tasks.push(t);open[t.id]=true;editing=true;
-    document.getElementById('btnEdit').textContent='Selesai Edit';document.getElementById('btnEdit').className='';
-    document.querySelector('.panel').classList.add('editing');
-    renderAll();renderFilters();renderTable();
-  });
+  (function(){
+    var w=document.getElementById('apNewWs'),p=document.getElementById('apNewPic');
+    w.innerHTML=D.workstreams.map(function(x){return '<option value="'+esc(x.id)+'">'+esc(x.label)+'</option>';}).join('');
+    p.innerHTML=D.pics.map(function(x){return '<option>'+esc(x)+'</option>';}).join('');
+  })();
+  function apAdd(){
+    var inp=document.getElementById('apNewText');
+    var title=(inp.value||'').trim();if(!title){inp.focus();return;}
+    var t={id:'n'+Date.now(),ws:document.getElementById('apNewWs').value||(D.workstreams[0]?D.workstreams[0].id:''),title:title,pic:document.getElementById('apNewPic').value||D.pics[0]||'',due:'',usulan:true,status:'Belum mulai',deliverable:'',note:''};
+    D.tasks.push(t);inp.value='';
+    renderAll();renderFilters();renderTable();inp.focus();
+  }
+  document.getElementById('btnAdd').addEventListener('click',apAdd);
+  document.getElementById('apNewText').addEventListener('keydown',function(ev){if(ev.key==='Enter'){ev.preventDefault();apAdd();}});
   document.getElementById('btnCsv').addEventListener('click',function(){
     var rows=[['No','Butir','Workstream','PIC','Target','Status','Usulan','Deliverable','Dependensi','Catatan']];
     visibleTasks().forEach(function(x,i){rows.push([i+1,x.title,wsLabel(x.ws),x.pic,x.due||'',x.status,x.usulan?'ya':'tidak',x.deliverable||'',x.depends||'',x.note||'']);});
