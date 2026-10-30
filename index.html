@@ -80,6 +80,11 @@ tbody tr.hold td:first-child{box-shadow:inset 3px 0 0 var(--hold)}
 .chk input{margin-top:3px;accent-color:var(--maroon);width:16px;height:16px;flex:0 0 auto}
 .chk.on{background:#f2f8f4;border-color:#cfe6d8}
 .chk.on span{text-decoration:line-through;color:var(--muted)}
+.chk .pm-del{margin-left:auto;flex:0 0 auto;border:none;background:none;color:var(--muted);font-size:11px;padding:3px 6px;border-radius:6px;cursor:pointer}
+.chk .pm-del:hover{color:#a01a33;background:#f6ecec}
+.pm-add{display:flex;gap:8px;margin-top:6px}
+.pm-add input{flex:1;font-family:inherit;font-size:13px;border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-width:0}
+.pm-add button{flex:0 0 auto}
 ul.clean{margin:0;padding-left:18px}
 ul.clean li{margin-bottom:6px}
 .notice{border-left:3px solid var(--hold);background:#fdf7ef;padding:10px 12px;border-radius:8px;font-size:12.5px;margin-bottom:10px}
@@ -161,9 +166,9 @@ body{padding:12px!important}
   <div class="sec-head">
     <div class="sec-eyebrow">Ritme mingguan · PIC Fahi</div>
     <h2 class="sec-title">Checklist Checkpoint Mingguan (PM)</h2>
-    <p class="sec-desc">Tujuh butir review rutin sebelum kampanye November berjalan. Centang tiap butir; centang tersimpan di perangkat ini saja (per browser), tidak tersinkron ke tim atau perangkat lain.</p>
+    <p class="sec-desc">Butir review rutin sebelum kampanye November berjalan. Centang, tambah, atau hapus butir sesuai kebutuhan; perubahan tersimpan di perangkat ini saja (per browser), tidak tersinkron ke tim atau perangkat lain.</p>
   </div>
-  <div class="panel"><div id="pmList"></div></div>
+  <div class="panel"><div id="pmList"></div><div class="pm-add"><input id="pmNewText" type="text" placeholder="Tulis butir checklist baru..." maxlength="300"><button type="button" id="btnPmAdd" class="primary">+ Tambah</button></div></div>
 </section>
 <div class="panel" id="secMom">
   <h2>MoM rapat — 30 Okt 2026</h2>
@@ -289,7 +294,7 @@ function renderPm(){
   var box=document.getElementById('pmList');var h='';
   (D.pmChecklistDefinitions||[]).forEach(function(d){
     var on=!!D.pmChecklist[d.id];
-    h+='<label class="chk'+(on?' on':'')+'"><input type="checkbox" data-pm="'+d.id+'"'+(on?' checked':'')+'><span>'+esc(d.text)+'</span></label>';
+    h+='<label class="chk'+(on?' on':'')+'"><input type="checkbox" data-pm="'+d.id+'"'+(on?' checked':'')+'><span>'+esc(d.text)+'</span><button type="button" class="pm-del" data-pm-del="'+d.id+'" title="Hapus butir">Hapus</button></label>';
   });
   box.innerHTML=h||'<div class="sm2">Tidak ada checklist.</div>';
 }
@@ -375,6 +380,30 @@ function wire(){
     var id=ev.target.getAttribute('data-pm');if(!id)return;
     D.pmChecklist[id]=ev.target.checked;renderPm();
   });
+  document.getElementById('pmList').addEventListener('click',function(ev){
+    var b=ev.target.closest?ev.target.closest('[data-pm-del]'):null;
+    if(!b||!document.getElementById('pmList').contains(b))return;
+    ev.preventDefault();ev.stopPropagation();
+    var id=b.getAttribute('data-pm-del');
+    var def=(D.pmChecklistDefinitions||[]).filter(function(d){return d.id===id;})[0];
+    if(!window.confirm('Hapus butir "'+((def&&def.text)||'').slice(0,80)+'" dari checklist?'))return;
+    D.pmChecklistDefinitions=(D.pmChecklistDefinitions||[]).filter(function(d){return d.id!==id;});
+    if(D.pmChecklist)delete D.pmChecklist[id];
+    renderPm();
+  });
+  function pmAddItem(){
+    var inp=document.getElementById('pmNewText');
+    var t=(inp.value||'').trim();if(!t)return;
+    if(!D.pmChecklistDefinitions)D.pmChecklistDefinitions=[];
+    var id;
+    do{id='pmx'+Date.now().toString(36)+Math.floor(Math.random()*36).toString(36);}while(D.pmChecklistDefinitions.some(function(d){return d.id===id;}));
+    D.pmChecklistDefinitions.push({id:id,text:t});
+    inp.value='';
+    renderPm();
+    inp.focus();
+  }
+  document.getElementById('btnPmAdd').addEventListener('click',pmAddItem);
+  document.getElementById('pmNewText').addEventListener('keydown',function(ev){if(ev.key==='Enter'){ev.preventDefault();document.getElementById('btnPmAdd').click();}});
 }
 function dl(name,mime,content){
   var b=new Blob([content],{type:mime});var a=document.createElement('a');
