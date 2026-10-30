@@ -37,6 +37,10 @@ header.top h1{margin:0 0 6px;font-size:22px}
 header.top .sub{font-size:13px;opacity:.93;max-width:940px}
 header.top .sub[contenteditable="true"]{cursor:text;border-bottom:1px dashed rgba(255,255,255,.55);outline:none;min-height:1.2em}
 header.top .sub[contenteditable="true"]:empty:before{content:attr(data-ph);opacity:.6}
+header.top h1[contenteditable="true"],header.top .meta span[contenteditable="true"]{cursor:text;border-bottom:1px dashed rgba(255,255,255,.55);outline:none}
+header.top h1[contenteditable="true"]:empty:before,header.top .meta span[contenteditable="true"]:empty:before{content:attr(data-ph);opacity:.6}
+header.top [contenteditable]:focus{background:rgba(255,255,255,.16);outline:1px solid rgba(255,255,255,.65);color:#fff}
+.editing header.top [contenteditable]{background:transparent;outline:none;padding:0;min-width:0}
 header.top .meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 header.top .meta span{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);padding:4px 10px;border-radius:999px;font-size:11.5px}
 .grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));margin-bottom:16px}
@@ -139,7 +143,7 @@ body{padding:12px!important}
 <header class="top">
   <h1 id="projName">Marketing Strategy Proxsis AI</h1>
   <div class="sub" id="projIntro"></div>
-  <div class="meta"><span id="metaExport">—</span><span id="metaCount">—</span><span>Klik status untuk memajukan · Mode Edit untuk mengubah isi</span></div>
+  <div class="meta"><span id="metaExport">—</span><span id="metaCount">—</span><span id="metaHint">Klik status untuk memajukan · Mode Edit untuk mengubah isi</span></div>
 </header>
 <div class="panel" id="secPlan">
   <div class="toolbar">
@@ -193,24 +197,41 @@ function esc(t){return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'
 function wsLabel(id){for(var i=0;i<D.workstreams.length;i++){if(D.workstreams[i].id===id)return D.workstreams[i].label;}return id||'-';}
 var editing=false,open={};
 function save(){try{if(window.PROVA_GET)return;}catch(e){}}
+function bindEdit(el,set,ph,tip,single){
+  if(el.getAttribute('data-edit-on'))return;
+  el.setAttribute('data-edit-on','1');
+  el.setAttribute('contenteditable','true');
+  el.setAttribute('spellcheck','false');
+  el.setAttribute('data-ph',ph);
+  el.setAttribute('title',tip);
+  el.addEventListener('input',function(){
+    set(el.innerText.replace(/\n+$/,''));
+    document.dispatchEvent(new Event('change'));
+  });
+  el.addEventListener('paste',function(ev){
+    ev.preventDefault();
+    var t=(ev.clipboardData||window.clipboardData).getData('text');
+    document.execCommand('insertText',false,t);
+  });
+  if(single){el.addEventListener('keydown',function(ev){if(ev.key==='Enter'){ev.preventDefault();el.blur();}});}
+}
 function renderHead(){
-  document.getElementById('projName').textContent=D.project.name||'Action Plan';
+  var pn=document.getElementById('projName');
+  pn.textContent=typeof D.project.name==='string'?D.project.name:'Action Plan';
+  bindEdit(pn,function(v){D.project.name=v;},'Ketuk untuk menulis judul...','Judul - ketuk untuk mengubah atau mengosongkan',true);
   var pi=document.getElementById('projIntro');
   pi.textContent=D.project.intro||'';
-  if(!pi.getAttribute('data-edit-on')){
-    pi.setAttribute('data-edit-on','1');
-    pi.setAttribute('contenteditable','true');
-    pi.setAttribute('spellcheck','false');
-    pi.setAttribute('data-ph','Ketuk untuk menulis pengantar...');
-    pi.setAttribute('title','Teks pengantar - ketuk untuk mengubah atau mengosongkan');
-    pi.addEventListener('input',function(){
-      D.project.intro=pi.innerText.replace(/\n+$/,'');
-      document.dispatchEvent(new Event('change'));
-    });
-  }
+  bindEdit(pi,function(v){D.project.intro=v;},'Ketuk untuk menulis pengantar...','Teks pengantar - ketuk untuk mengubah atau mengosongkan',false);
   document.getElementById('projClosing').textContent=D.project.closing||'';
-  document.getElementById('metaExport').textContent='Diekspor: '+(D.exportedAt?new Date(D.exportedAt).toLocaleString('id-ID'):'-');
-  document.getElementById('metaCount').textContent=D.tasks.length+' butir · '+D.workstreams.length+' workstream';
+  var me=document.getElementById('metaExport');
+  me.textContent=typeof D.project.metaExport==='string'?D.project.metaExport:('Diekspor: '+(D.exportedAt?new Date(D.exportedAt).toLocaleString('id-ID'):'-'));
+  bindEdit(me,function(v){D.project.metaExport=v;},'Ketuk untuk mengisi...','Label tanggal ekspor - ketuk untuk mengubah atau mengosongkan',true);
+  var mc=document.getElementById('metaCount');
+  mc.textContent=typeof D.project.metaCount==='string'?D.project.metaCount:(D.tasks.length+' butir · '+D.workstreams.length+' workstream');
+  bindEdit(mc,function(v){D.project.metaCount=v;},'Ketuk untuk mengisi...','Label jumlah butir - ketuk untuk mengubah atau mengosongkan',true);
+  var mh=document.getElementById('metaHint');
+  mh.textContent=typeof D.project.metaHint==='string'?D.project.metaHint:'Klik status untuk memajukan · Mode Edit untuk mengubah isi';
+  bindEdit(mh,function(v){D.project.metaHint=v;},'Ketuk untuk mengisi...','Label petunjuk - ketuk untuk mengubah atau mengosongkan',true);
 }
 function renderKpi(){
   var t=D.tasks,n=t.length,done=0,run=0,hold=0,idle=0,usul=0;
