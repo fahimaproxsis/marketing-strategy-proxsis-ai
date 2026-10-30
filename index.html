@@ -96,6 +96,13 @@ ul.clean li{margin-bottom:6px}
 .sec-desc{margin:0;font-size:12.5px;color:var(--muted);max-width:940px}
 #secPm .panel{border-top:3px solid var(--maroon)}
 @media(max-width:720px){.kv{grid-template-columns:1fr}header.top h1{font-size:19px}.kpi .val{font-size:22px}}
+
+.navmenu{position:sticky;top:8px;z-index:5000;background:rgba(246,244,241,.95);backdrop-filter:blur(6px);border:1px solid var(--line);border-radius:12px;padding:8px 10px;margin-bottom:12px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.navmenu a{text-decoration:none;color:var(--ink);font-size:13px;padding:6px 12px;border-radius:8px;border:1px solid transparent}
+.navmenu a:hover{border-color:var(--line);background:#fff}
+.navmenu a.pm{background:var(--maroon);color:#fff;border-color:var(--maroon)}
+.navmenu a.pm:hover{background:var(--maroon2)}
+.panel,.sec{scroll-margin-top:76px}
 </style>
 <style id="prova-layout-fix">
 .page,.slide,.sheet,.paper,[data-page]{width:100%!important;max-width:1280px!important;height:auto!important;min-height:0!important;overflow:visible!important;margin-left:auto!important;margin-right:auto!important;box-sizing:border-box!important}
@@ -114,12 +121,18 @@ body{padding:12px!important}
 </head>
 <body>
 <div class="wrap">
+<nav class="navmenu">
+  <a href="#secPlan">Action Plan</a>
+  <a href="#secTujuan">Tujuan</a>
+  <a href="#secPm" class="pm">Checklist PM</a>
+  <a href="#secMom">MoM Rapat</a>
+</nav>
 <header class="top">
   <h1 id="projName">Marketing Strategy Proxsis AI</h1>
   <div class="sub" id="projIntro"></div>
   <div class="meta"><span id="metaExport">—</span><span id="metaCount">—</span><span>Klik status untuk memajukan · Mode Edit untuk mengubah isi</span></div>
 </header>
-<div class="panel">
+<div class="panel" id="secPlan">
   <div class="toolbar">
     <input type="search" id="q" placeholder="Cari butir, PIC, atau catatan...">
     <select id="fWs"><option value="">Semua workstream</option></select>
@@ -139,7 +152,7 @@ body{padding:12px!important}
   <div class="panel"><h2>Progres per workstream</h2><p class="hint">Selesai = 100%, Proses = 50%, Tertahan = 25%, Belum mulai = 0%.</p><div class="chartbox"><canvas id="chWs"></canvas></div></div>
   <div class="panel"><h2>Sebaran status</h2><p class="hint">Jumlah butir per status.</p><div class="chartbox"><canvas id="chSt"></canvas></div></div>
 </div>
-<div class="panel">
+<div class="panel" id="secTujuan">
   <h2>Tujuan &amp; kriteria sukses</h2>
   <p class="hint">Ringkasan dari dokumen sumber.</p>
   <div id="purposeBox"></div>
@@ -152,7 +165,7 @@ body{padding:12px!important}
   </div>
   <div class="panel"><div id="pmList"></div></div>
 </section>
-<div class="panel">
+<div class="panel" id="secMom">
   <h2>MoM rapat — 30 Okt 2026</h2>
   <p class="hint" id="momMeta"></p>
   <div class="notice" id="momCallout"></div>
@@ -513,5 +526,30 @@ hydrate();
 }
 if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',bind);}else{bind();}
 })();
-</script></body>
+</script><script>
+/* Simpan lokal: centang checklist dan perubahan lain bertahan di perangkat ini (per browser). Tombol Simpan tetap mengunduh salinan HTML. */
+(function(){
+  var KEY='mspa-state-v1', last='';
+  function persist(){
+    try{
+      if(typeof window.PROVA_GET!=='function')return;
+      var s=JSON.stringify(window.PROVA_GET());
+      if(s&&s!==last){last=s;localStorage.setItem(KEY,s);}
+    }catch(e){}
+  }
+  function restore(){
+    try{
+      var raw=localStorage.getItem(KEY);
+      if(!raw)return;
+      var d=JSON.parse(raw);
+      if(d&&d.tasks&&typeof window.PROVA_LOAD==='function'){window.PROVA_LOAD(d);}
+    }catch(e){}
+  }
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',restore);}
+  else{restore();}
+  document.addEventListener('change',function(){setTimeout(persist,60);},true);
+  document.addEventListener('click',function(){setTimeout(persist,120);},true);
+})();
+</script>
+</body>
 </html>
