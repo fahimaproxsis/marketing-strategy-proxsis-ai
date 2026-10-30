@@ -124,7 +124,7 @@ body{padding:12px!important}
 <nav class="navmenu">
   <a href="#secPlan">Action Plan</a>
   <a href="#secTujuan">Tujuan</a>
-  <a href="#secPm" class="pm">Checklist PM</a>
+  <a href="#secPm">Checklist PM</a>
   <a href="#secMom">MoM Rapat</a>
 </nav>
 <header class="top">
@@ -552,6 +552,25 @@ if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded'
   else{restore();}
   document.addEventListener('change',function(){setTimeout(persist,60);},true);
   document.addEventListener('click',function(){setTimeout(persist,120);},true);
+})();
+</script>
+<script>
+(function(){
+  var links = Array.prototype.slice.call(document.querySelectorAll('.navmenu a'));
+  if(!links.length) return;
+  var secs = links.map(function(a){ return document.getElementById((a.getAttribute('href')||'').slice(1)); });
+  function setActive(i){
+    links.forEach(function(a,j){ a.classList.toggle('pm', i===j); });
+  }
+  function onScroll(){
+    var y = window.scrollY + 120;
+    var idx = 0;
+    for (var i=0;i<secs.length;i++){ if (secs[i] && secs[i].offsetTop <= y) idx = i; }
+    setActive(idx);
+  }
+  links.forEach(function(a,i){ a.addEventListener('click', function(){ setActive(i); }); });
+  window.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
 })();
 </script>
 </body>
