@@ -143,7 +143,7 @@ body{padding:12px!important}
 <header class="top">
   <h1 id="projName">Marketing Strategy Proxsis AI</h1>
   <div class="sub" id="projIntro"></div>
-  <div class="meta"><span id="metaExport">—</span><span id="metaCount">—</span><span id="metaHint">Klik status untuk memajukan · Mode Edit untuk mengubah isi</span></div>
+  <div class="meta"><span id="metaExport">—</span></div>
 </header>
 <div class="panel" id="secPlan">
   <div class="toolbar">
@@ -226,12 +226,6 @@ function renderHead(){
   var me=document.getElementById('metaExport');
   me.textContent=typeof D.project.metaExport==='string'?D.project.metaExport:('Diekspor: '+(D.exportedAt?new Date(D.exportedAt).toLocaleString('id-ID'):'-'));
   bindEdit(me,function(v){D.project.metaExport=v;},'Ketuk untuk mengisi...','Label tanggal ekspor - ketuk untuk mengubah atau mengosongkan',true);
-  var mc=document.getElementById('metaCount');
-  mc.textContent=typeof D.project.metaCount==='string'?D.project.metaCount:(D.tasks.length+' butir · '+D.workstreams.length+' workstream');
-  bindEdit(mc,function(v){D.project.metaCount=v;},'Ketuk untuk mengisi...','Label jumlah butir - ketuk untuk mengubah atau mengosongkan',true);
-  var mh=document.getElementById('metaHint');
-  mh.textContent=typeof D.project.metaHint==='string'?D.project.metaHint:'Klik status untuk memajukan · Mode Edit untuk mengubah isi';
-  bindEdit(mh,function(v){D.project.metaHint=v;},'Ketuk untuk mengisi...','Label petunjuk - ketuk untuk mengubah atau mengosongkan',true);
 }
 function renderKpi(){
   var t=D.tasks,n=t.length,done=0,run=0,hold=0,idle=0,usul=0;
