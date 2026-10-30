@@ -254,7 +254,7 @@ function renderTable(){
     seq++;
     var cls=stCls(x.status),p=pctOf(x.status),isOpen=!!open[x.id];
     var ttl=editing?'<span contenteditable="true" data-field="title" data-id="'+x.id+'">'+esc(x.title)+'</span>':'<span class="ttl" data-act="toggle" data-id="'+x.id+'">'+esc(x.title)+'</span>';
-    var sub=x.usulan?'<div class="sm2"><span class="tag">usulan</span></div>':'';
+    var sub='';
     var picCell=editing?'<span contenteditable="true" data-field="pic" data-id="'+x.id+'">'+esc(x.pic)+'</span>':esc(x.pic);
     var dueCell=editing?'<span contenteditable="true" data-field="due" data-id="'+x.id+'">'+esc(x.due||'')+'</span>':esc(x.due||'-');
     var out='<tr class="'+cls+'"><td>'+seq+'</td><td>'+ttl+sub+'</td><td class="sm2">'+esc(wsLabel(x.ws))+'</td><td>'+picCell+'</td><td class="sm2">'+dueCell+'</td>'+
